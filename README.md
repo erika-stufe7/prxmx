@@ -18,10 +18,19 @@ Planmäßiger Shutdown von VMs zu definierten Zeiten.
 
 ## 🔮 Geplante Services
 
+### Cluster-Management
 - `backup_scheduler` - Intelligente Backup-Orchestrierung
 - `health_monitor` - Cluster-Health und Alerting
 - `resource_optimizer` - Automatische VM-Migration bei Last
 - `snapshot_manager` - Snapshot-Lifecycle-Management
+
+### VM-Provisioning
+- `win11_gaming_provisioner` - Automatische Erstellung von Windows 11 Gaming-VMs
+  - NVIDIA GPU-Passthrough (vGPU oder PCIe)
+  - Game Streaming Setup (Parsec, Moonlight, Steam Remote Play)
+  - Optimierte Gaming-Performance (CPU Pinning, Huge Pages)
+  - Template-basierte Deployment
+  - *KI-gestützte Konfiguration bereits entwickelt - wird bald integriert*
 
 ## 🏗️ Architektur
 
