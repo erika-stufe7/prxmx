@@ -84,8 +84,9 @@ check_python() {
             
             if [[ $PYTHON_MAJOR -ge 3 ]] && [[ $PYTHON_MINOR -ge 11 ]]; then
                 return 0
-            else
-                log_warning "Python $PYTHON_VERSION ist älter als empfohlen ($PYTHON_MIN_VERSION+)"
+            elif [[ $PYTHON_MAJOR -ge 3 ]] && [[ $PYTHON_MINOR -ge 10 ]]; then
+                log_warning "Python $PYTHON_VERSION ist älter als empfohlen ($PYTHON_MIN_VERSION+), sollte aber funktionieren"
+                return 0
             fi
         fi
     done
@@ -105,6 +106,7 @@ check_dependencies() {
         "python3-venv"
         "python3-pip"
         "git"
+        "rsync"
     )
     
     for pkg in "${required_packages[@]}"; do
@@ -144,8 +146,13 @@ install_files() {
     mkdir -p "$INSTALL_DIR"
     
     # Kopiere Projektdateien
-    rsync -av --exclude='venv' --exclude='__pycache__' --exclude='*.pyc' \
-        "$SCRIPT_DIR/" "$INSTALL_DIR/"
+    if rsync -a --exclude='venv' --exclude='__pycache__' --exclude='*.pyc' --exclude='.git' \
+        "$SCRIPT_DIR/" "$INSTALL_DIR/"; then
+        log_success "Dateien kopiert"
+    else
+        log_error "Fehler beim Kopieren der Dateien"
+        exit 1
+    fi
     
     # Setze Berechtigungen
     chown -R "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR"
@@ -180,9 +187,13 @@ install_python_deps() {
     fi
     
     # Installiere mit pip (robust für zukünftige Versionen)
-    sudo -u "$SERVICE_USER" "$VENV_DIR/bin/pip" install -r "$INSTALL_DIR/requirements.txt"
-    
-    log_success "Python-Pakete installiert"
+    if sudo -u "$SERVICE_USER" "$VENV_DIR/bin/pip" install -r "$INSTALL_DIR/requirements.txt"; then
+        log_success "Python-Pakete installiert"
+    else
+        log_error "Python-Paket-Installation fehlgeschlagen"
+        log_info "Prüfe requirements.txt und Netzwerkverbindung"
+        exit 1
+    fi
 }
 
 setup_config() {
@@ -231,13 +242,13 @@ Group=$SERVICE_USER
 WorkingDirectory=$INSTALL_DIR
 ExecStart=$VENV_DIR/bin/python -m services.node_idle_shutdown.main
 
-# Restart-Strategie
+# Restart strategy
 Restart=on-failure
 RestartSec=30
-StartLimitInterval=300
+StartLimitIntervalSec=300
 StartLimitBurst=5
 
-# Sicherheit
+# Security
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
@@ -267,13 +278,13 @@ Group=$SERVICE_USER
 WorkingDirectory=$INSTALL_DIR
 ExecStart=$VENV_DIR/bin/python -m services.shutdown.main
 
-# Restart-Strategie
+# Restart strategy
 Restart=on-failure
 RestartSec=30
-StartLimitInterval=300
+StartLimitIntervalSec=300
 StartLimitBurst=5
 
-# Sicherheit
+# Security
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
@@ -292,7 +303,13 @@ EOF
     # Reload systemd
     systemctl daemon-reload
     
-    log_success "Systemd Services installiert"
+    # Prüfe ob Services erstellt wurden
+    if systemctl list-unit-files | grep -q "proxmox-node-idle-shutdown.service"; then
+        log_success "Systemd Services installiert"
+    else
+        log_error "Fehler beim Erstellen der systemd Services"
+        exit 1
+    fi
 }
 
 print_summary() {
