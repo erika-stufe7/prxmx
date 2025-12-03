@@ -75,7 +75,7 @@ Node: pve01
 
 ## Systemd Integration
 
-`/etc/systemd/system/proxmox-node-idle-shutdown.service`:
+`/etc/systemd/system/prxmx-node-idle-shutdown.service`:
 ```ini
 [Unit]
 Description=Proxmox Node Idle Shutdown Service
@@ -84,8 +84,8 @@ After=network.target pve-cluster.service
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/proxmox-services
-ExecStart=/opt/proxmox-services/venv/bin/python -m services.node_idle_shutdown.main
+WorkingDirectory=/opt/prxmx-services
+ExecStart=/opt/prxmx-services/venv/bin/python -m services.node_idle_shutdown.main
 Restart=on-failure
 RestartSec=30
 
@@ -95,9 +95,9 @@ WantedBy=multi-user.target
 
 Aktivieren:
 ```bash
-sudo systemctl enable proxmox-node-idle-shutdown
-sudo systemctl start proxmox-node-idle-shutdown
-sudo systemctl status proxmox-node-idle-shutdown
+sudo systemctl enable prxmx-node-idle-shutdown
+sudo systemctl start prxmx-node-idle-shutdown
+sudo systemctl status prxmx-node-idle-shutdown
 ```
 
 ## Logging
@@ -122,16 +122,16 @@ Der Service loggt **nur State-Änderungen** (kein Spam bei Checks):
 ### Logs ansehen
 ```bash
 # Live-Logs (systemd)
-journalctl -u proxmox-node-idle-shutdown -f
+journalctl -u prxmx-node-idle-shutdown -f
 
 # Nur Errors
-journalctl -u proxmox-node-idle-shutdown -p err -f
+journalctl -u prxmx-node-idle-shutdown -p err -f
 
 # Letzte 50 Zeilen
-journalctl -u proxmox-node-idle-shutdown -n 50
+journalctl -u prxmx-node-idle-shutdown -n 50
 
 # Mit Timestamps
-journalctl -u proxmox-node-idle-shutdown --since "1 hour ago"
+journalctl -u prxmx-node-idle-shutdown --since "1 hour ago"
 ```
 
 ### Log-Konfiguration
@@ -197,7 +197,7 @@ Der Service kann mit Prometheus/Telegraf integriert werden:
 python scripts/tag_vms.py --list | grep -v safe-shutdown
 
 # Prüfe Service-Logs
-journalctl -u proxmox-node-idle-shutdown --since "10 minutes ago"
+journalctl -u prxmx-node-idle-shutdown --since "10 minutes ago"
 ```
 
 **Node fährt zu früh herunter:**

@@ -7,8 +7,8 @@ set -e  # Exit bei Fehler
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_DIR="/opt/proxmox-services"
-SERVICE_USER="proxmox-services"
+INSTALL_DIR="/opt/prxmx-services"
+SERVICE_USER="prxmx-services"
 VENV_DIR="$INSTALL_DIR/venv"
 PYTHON_MIN_VERSION="3.10"
 PYTHON_MAX_VERSION="3.11"
@@ -154,9 +154,9 @@ install_files() {
     
     # Kopiere uninstall.sh nach /usr/local/bin für globalen Zugriff
     if [[ -f "$SCRIPT_DIR/uninstall.sh" ]]; then
-        cp "$SCRIPT_DIR/uninstall.sh" /usr/local/bin/proxmox-services-uninstall
-        chmod +x /usr/local/bin/proxmox-services-uninstall
-        log_success "Uninstall-Script nach /usr/local/bin/proxmox-services-uninstall kopiert"
+        cp "$SCRIPT_DIR/uninstall.sh" /usr/local/bin/prxmx-services-uninstall
+        chmod +x /usr/local/bin/prxmx-services-uninstall
+        log_success "Uninstall-Script nach /usr/local/bin/prxmx-services-uninstall kopiert"
     fi
     
     # Setze Berechtigungen
@@ -234,7 +234,7 @@ install_systemd_services() {
     log_info "Installiere systemd Services..."
     
     # Node Idle Shutdown Service
-    cat > /etc/systemd/system/proxmox-node-idle-shutdown.service <<EOF
+    cat > /etc/systemd/system/prxmx-node-idle-shutdown.service <<EOF
 [Unit]
 Description=Proxmox Node Idle Shutdown Service
 After=network.target
@@ -263,14 +263,14 @@ ReadWritePaths=$INSTALL_DIR
 # Logging
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=proxmox-node-idle-shutdown
+SyslogIdentifier=prxmx-node-idle-shutdown
 
 [Install]
 WantedBy=multi-user.target
 EOF
     
     # Scheduled Shutdown Service
-    cat > /etc/systemd/system/proxmox-scheduled-shutdown.service <<EOF
+    cat > /etc/systemd/system/prxmx-scheduled-shutdown.service <<EOF
 [Unit]
 Description=Proxmox Scheduled VM Shutdown Service
 After=network.target
@@ -299,7 +299,7 @@ ReadWritePaths=$INSTALL_DIR
 # Logging
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=proxmox-scheduled-shutdown
+SyslogIdentifier=prxmx-scheduled-shutdown
 
 [Install]
 WantedBy=multi-user.target
@@ -309,7 +309,7 @@ EOF
     systemctl daemon-reload
     
     # Prüfe ob Services erstellt wurden
-    if systemctl list-unit-files | grep -q "proxmox-node-idle-shutdown.service"; then
+    if systemctl list-unit-files | grep -q "prxmx-node-idle-shutdown.service"; then
         log_success "Systemd Services installiert"
     else
         log_error "Fehler beim Erstellen der systemd Services"
@@ -347,19 +347,19 @@ print_summary() {
     echo
     echo "3. Services aktivieren und starten:"
     echo "   # Node Idle Shutdown"
-    echo "   sudo systemctl enable proxmox-node-idle-shutdown"
-    echo "   sudo systemctl start proxmox-node-idle-shutdown"
+    echo "   sudo systemctl enable prxmx-node-idle-shutdown"
+    echo "   sudo systemctl start prxmx-node-idle-shutdown"
     echo
     echo "   # Scheduled Shutdown"
-    echo "   sudo systemctl enable proxmox-scheduled-shutdown"
-    echo "   sudo systemctl start proxmox-scheduled-shutdown"
+    echo "   sudo systemctl enable prxmx-scheduled-shutdown"
+    echo "   sudo systemctl start prxmx-scheduled-shutdown"
     echo
     echo "4. Status prüfen:"
-    echo "   sudo systemctl status proxmox-node-idle-shutdown"
-    echo "   sudo journalctl -u proxmox-node-idle-shutdown -f"
+    echo "   sudo systemctl status prxmx-node-idle-shutdown"
+    echo "   sudo journalctl -u prxmx-node-idle-shutdown -f"
     echo
     echo "💡 Deinstallation:"
-    echo "   sudo proxmox-services-uninstall"
+    echo "   sudo prxmx-services-uninstall"
     echo
     echo "=========================================================================="
     echo

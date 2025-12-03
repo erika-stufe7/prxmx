@@ -85,12 +85,12 @@ sudo bash install.sh
 The script will:
 - ✅ Check Debian version and Python 3.10+
 - ✅ Install missing dependencies (python3-venv, pip, git, rsync)
-- ✅ Create service user (`proxmox-services`)
-- ✅ Copy files to `/opt/proxmox-services`
+- ✅ Create service user (`prxmx-services`)
+- ✅ Copy files to `/opt/prxmx-services`
 - ✅ Set up virtual environment
 - ✅ Install Python dependencies
 - ✅ Create systemd services
-- ✅ Install uninstall command: `proxmox-services-uninstall`
+- ✅ Install uninstall command: `prxmx-services-uninstall`
 
 **Supported:** Debian 13 (Trixie), Proxmox VE 9, and newer versions
 
@@ -98,30 +98,30 @@ The script will:
 
 1. **Configure Proxmox API:**
    ```bash
-   sudo nano /opt/proxmox-services/config/proxmox.yml
+   sudo nano /opt/prxmx-services/config/proxmox.yml
    ```
 
 2. **Enable services:**
    ```bash
    # Node Idle Shutdown
-   sudo systemctl enable --now proxmox-node-idle-shutdown
+   sudo systemctl enable --now prxmx-node-idle-shutdown
    
    # Scheduled Shutdown
-   sudo systemctl enable --now proxmox-scheduled-shutdown
+   sudo systemctl enable --now prxmx-scheduled-shutdown
    ```
 
 3. **Monitor logs:**
    ```bash
-   sudo journalctl -u proxmox-node-idle-shutdown -f
+   sudo journalctl -u prxmx-node-idle-shutdown -f
    ```
 
 ### Uninstallation
 ```bash
 # Uninstall command is available globally after installation
-sudo proxmox-services-uninstall
+sudo prxmx-services-uninstall
 
 # Alternative: Run from installation directory
-sudo /opt/proxmox-services/uninstall.sh
+sudo /opt/prxmx-services/uninstall.sh
 ```
 
 ## Development

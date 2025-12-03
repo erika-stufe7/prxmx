@@ -10,8 +10,10 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-INSTALL_DIR="/opt/proxmox-services"
-SERVICE_USER="proxmox-services"
+# =============================================================================
+
+INSTALL_DIR="/opt/prxmx-services"
+SERVICE_USER="prxmx-services"
 
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -44,16 +46,16 @@ main() {
     fi
     
     log_info "Stoppe Services..."
-    systemctl stop proxmox-node-idle-shutdown 2>/dev/null || true
-    systemctl stop proxmox-scheduled-shutdown 2>/dev/null || true
+    systemctl stop prxmx-node-idle-shutdown 2>/dev/null || true
+    systemctl stop prxmx-scheduled-shutdown 2>/dev/null || true
     
     log_info "Deaktiviere Services..."
-    systemctl disable proxmox-node-idle-shutdown 2>/dev/null || true
-    systemctl disable proxmox-scheduled-shutdown 2>/dev/null || true
+    systemctl disable prxmx-node-idle-shutdown 2>/dev/null || true
+    systemctl disable prxmx-scheduled-shutdown 2>/dev/null || true
     
     log_info "Entferne systemd Services..."
-    rm -f /etc/systemd/system/proxmox-node-idle-shutdown.service
-    rm -f /etc/systemd/system/proxmox-scheduled-shutdown.service
+    rm -f /etc/systemd/system/prxmx-node-idle-shutdown.service
+    rm -f /etc/systemd/system/prxmx-scheduled-shutdown.service
     systemctl daemon-reload
     
     log_info "Entferne Installation..."
