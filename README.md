@@ -73,19 +73,26 @@ Modular system with shared libraries:
 ### Automatic Installation (recommended)
 
 ```bash
-# Run as root
-sudo ./install.sh
+# Clone repository (use permanent location, not /tmp!)
+cd /opt
+git clone https://github.com/erika-stufe7/prxmx.git
+cd prxmx
+
+# Run installation
+sudo bash install.sh
 ```
 
-The script:
-- ✅ Checks Debian version (13+)
-- ✅ Installs missing dependencies
-- ✅ Creates service user
-- ✅ Sets up virtual environment
-- ✅ Installs systemd services
-- ✅ Configures permissions
+The script will:
+- ✅ Check Debian version and Python 3.10+
+- ✅ Install missing dependencies (python3-venv, pip, git, rsync)
+- ✅ Create service user (`proxmox-services`)
+- ✅ Copy files to `/opt/proxmox-services`
+- ✅ Set up virtual environment
+- ✅ Install Python dependencies
+- ✅ Create systemd services
+- ✅ Install uninstall command: `proxmox-services-uninstall`
 
-**Supported:** Debian 13 (Trixie) and newer versions
+**Supported:** Debian 13 (Trixie), Proxmox VE 9, and newer versions
 
 ### Post-Installation
 
@@ -110,7 +117,11 @@ The script:
 
 ### Uninstallation
 ```bash
-sudo ./uninstall.sh
+# Uninstall command is available globally after installation
+sudo proxmox-services-uninstall
+
+# Alternative: Run from installation directory
+sudo /opt/proxmox-services/uninstall.sh
 ```
 
 ## Development

@@ -152,6 +152,13 @@ install_files() {
         exit 1
     fi
     
+    # Kopiere uninstall.sh nach /usr/local/bin für globalen Zugriff
+    if [[ -f "$SCRIPT_DIR/uninstall.sh" ]]; then
+        cp "$SCRIPT_DIR/uninstall.sh" /usr/local/bin/proxmox-services-uninstall
+        chmod +x /usr/local/bin/proxmox-services-uninstall
+        log_success "Uninstall-Script nach /usr/local/bin/proxmox-services-uninstall kopiert"
+    fi
+    
     # Setze Berechtigungen
     chown -R "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR"
     
@@ -350,6 +357,9 @@ print_summary() {
     echo "4. Status prüfen:"
     echo "   sudo systemctl status proxmox-node-idle-shutdown"
     echo "   sudo journalctl -u proxmox-node-idle-shutdown -f"
+    echo
+    echo "💡 Deinstallation:"
+    echo "   sudo proxmox-services-uninstall"
     echo
     echo "=========================================================================="
     echo
