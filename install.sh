@@ -10,7 +10,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_DIR="/opt/proxmox-services"
 SERVICE_USER="proxmox-services"
 VENV_DIR="$INSTALL_DIR/venv"
-PYTHON_MIN_VERSION="3.11"
+PYTHON_MIN_VERSION="3.10"
+PYTHON_MAX_VERSION="3.11"
 
 # Farben für Output
 RED='\033[0;31m'
@@ -71,28 +72,29 @@ check_debian() {
 check_python() {
     log_info "Prüfe Python-Installation..."
     
-    # Suche nach Python 3.x (flexibel für zukünftige Versionen)
-    for py_cmd in python3.13 python3.12 python3.11 python3.10 python3; do
+    # Versuche Python-Versionen in absteigender Reihenfolge (max 3.11 wegen pydantic)
+    for py_version in python3.11 python3.10 python3; do
         if command -v "$py_cmd" &> /dev/null; then
             PYTHON_CMD="$py_cmd"
             PYTHON_VERSION=$($PYTHON_CMD --version 2>&1 | awk '{print $2}')
             log_success "Python gefunden: $PYTHON_CMD ($PYTHON_VERSION)"
             
-            # Version-Check
+            # Version-Check (3.10-3.11 wegen pydantic-Kompatibilität)
             PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d'.' -f1)
             PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d'.' -f2)
             
-            if [[ $PYTHON_MAJOR -ge 3 ]] && [[ $PYTHON_MINOR -ge 11 ]]; then
+            if [[ $PYTHON_MAJOR -eq 3 ]] && [[ $PYTHON_MINOR -ge 10 ]] && [[ $PYTHON_MINOR -le 11 ]]; then
                 return 0
-            elif [[ $PYTHON_MAJOR -ge 3 ]] && [[ $PYTHON_MINOR -ge 10 ]]; then
-                log_warning "Python $PYTHON_VERSION ist älter als empfohlen ($PYTHON_MIN_VERSION+), sollte aber funktionieren"
-                return 0
+            elif [[ $PYTHON_MAJOR -eq 3 ]] && [[ $PYTHON_MINOR -gt 11 ]]; then
+                log_error "Python $PYTHON_VERSION ist zu neu (maximal 3.11 unterstützt wegen pydantic)"
+                log_info "Installiere Python 3.11: apt install python3.11 python3.11-venv"
+                exit 1
             fi
         fi
     done
     
-    log_error "Python 3.11+ nicht gefunden"
-    log_info "Installation mit: apt install python3 python3-venv python3-pip"
+    log_error "Python 3.10 oder 3.11 nicht gefunden"
+    log_info "Installation mit: apt install python3.11 python3.11-venv python3-pip"
     exit 1
 }
 
