@@ -1,0 +1,13 @@
+# Proxmox Configuration Example
+# Kopiere diese Datei nach proxmox.yml und fülle die Credentials aus
+
+proxmox:
+  host: "pve.example.com"  # Proxmox VE Hostname oder IP
+  user: "root@pam"         # Proxmox User (format: user@realm)
+  token_name: "api"        # API Token Name
+  token_value: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # API Token Secret
+  verify_ssl: true         # SSL-Zertifikat verifizieren
+
+# API Token erstellen:
+# Datacenter > Permissions > API Tokens > Add
+# Privilege Separation deaktivieren für volle User-Rechte

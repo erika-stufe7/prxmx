@@ -1,0 +1,41 @@
+# Shutdown Service Configuration
+
+# Service aktivieren/deaktivieren
+enabled: false  # Auf true setzen um Service zu aktivieren
+
+# Prüfintervall in Sekunden
+check_interval: 300  # Alle 5 Minuten prüfen
+
+# Automatischer Shutdown zu bestimmter Uhrzeit
+shutdown_time:
+  hour: 22      # 22:00 Uhr
+  minute: 0
+
+# Grace Period für Shutdown (Sekunden)
+grace_period: 60
+
+# VMs/Container die vom Shutdown ausgenommen sind
+excluded_vms:
+  - 100  # Beispiel: Kritischer Service
+  - 101  # Beispiel: Monitoring-System
+
+# Tag für VMs/Container die sicher heruntergefahren werden können
+# VMs mit diesem Tag werden beim Node-Shutdown automatisch gestoppt
+safe_shutdown_tag: "safe-shutdown"  # Standard: "safe-shutdown"
+
+# Kaskadierter Shutdown (optional)
+# Definiert Reihenfolge in der VMs/Container heruntergefahren werden
+shutdown_order:
+  - name: "Desktop VMs"
+    vmids: [200, 201, 202]
+    wait_after: 30  # Warte 30s bevor nächste Stage
+  
+  - name: "Application Servers"
+    vmids: [110, 111, 112]
+    wait_after: 60
+  
+  - name: "Database Servers"
+    vmids: [105, 106]
+    wait_after: 60
+
+# Wenn shutdown_order leer ist, werden alle VMs/Container parallel heruntergefahren
