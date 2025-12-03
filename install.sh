@@ -324,10 +324,19 @@ print_summary() {
     echo
     echo "1. Proxmox API-Token konfigurieren:"
     echo "   sudo nano $INSTALL_DIR/config/proxmox.yml"
+    echo "   → Trage host, user, token_name, token_value ein"
     echo
-    echo "2. Services konfigurieren:"
+    echo "2. Services konfigurieren (WICHTIG!):"
+    echo "   Node Idle Shutdown:"
     echo "   sudo nano $INSTALL_DIR/services/node_idle_shutdown/config.yml"
+    echo "   → enabled: true          (Service aktivieren)"
+    echo "   → dry_run: false         (Echten Shutdown aktivieren)"
+    echo "   → check_interval: 300    (Polling-Intervall in Sekunden)"
+    echo "   → grace_period: 60       (Wartezeit vor Shutdown)"
+    echo
+    echo "   Scheduled Shutdown:"
     echo "   sudo nano $INSTALL_DIR/services/shutdown/config.yml"
+    echo "   → enabled: true/false    (Bei Bedarf aktivieren)"
     echo
     echo "3. Services aktivieren und starten:"
     echo "   # Node Idle Shutdown"
