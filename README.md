@@ -1,96 +1,99 @@
 # prxmx - Proxmox Service Collection
 
-Eine wachsende Sammlung von Automatisierungs-Services für Proxmox VE Cluster.
+A growing collection of automation services for Proxmox VE clusters.
 
-## 🎯 Verfügbare Services
+## 🎯 Available Services
 
-### `node_idle_shutdown` - Intelligenter Node-Shutdown ⚡
-Fährt Proxmox Nodes automatisch herunter wenn nur noch unkritische VMs laufen.
-- **Use Case:** Energie sparen bei hybrider Workload
-- **Logik:** VMs ohne `safe-shutdown` Tag halten Node am Laufen
+### `node_idle_shutdown` - Smart Node Shutdown ⚡
+Automatically shuts down Proxmox nodes when only non-critical VMs are running.
+- **Use Case:** Energy saving with hybrid workloads
+- **Logic:** VMs without `safe-shutdown` tag keep the node running
 - **Status:** ✅ Production-ready
 
-### `shutdown` - Zeitbasierter VM-Shutdown 🕒
-Planmäßiger Shutdown von VMs zu definierten Zeiten.
-- **Use Case:** Nächtliche Shutdowns, Wartungsfenster
-- **Features:** Kaskadierter Shutdown, Tag-Filterung
+### `shutdown` - Scheduled VM Shutdown 🕒
+Time-based shutdown of VMs at defined times.
+- **Use Cases:**
+  - **Solar Energy Optimization:** Shutdown nodes at night when solar surplus ends, save battery/grid costs
+  - **Peak Energy Savings:** Run workloads during cheap daytime solar hours, shutdown expensive night operations
+  - **Maintenance Windows:** Scheduled shutdowns for updates and maintenance
+- **Features:** Cascading shutdown, tag-based filtering
 - **Status:** ✅ Production-ready
 
-## 🔮 Geplante Services
+## 🔮 Planned Services
 
-### Cluster-Management
-- `backup_scheduler` - Intelligente Backup-Orchestrierung
-- `health_monitor` - Cluster-Health und Alerting
-- `resource_optimizer` - Automatische VM-Migration bei Last
-- `snapshot_manager` - Snapshot-Lifecycle-Management
+### Cluster Management
+- `backup_scheduler` - Intelligent backup orchestration
+- `health_monitor` - Cluster health monitoring and alerting
+- `resource_optimizer` - Automatic VM migration based on load
+- `snapshot_manager` - Snapshot lifecycle management
 
-### VM-Provisioning
-- `win11_gaming_provisioner` - Automatische Erstellung von Windows 11 Gaming-VMs
-  - NVIDIA GPU-Passthrough (vGPU oder PCIe)
-  - Game Streaming Setup (Parsec, Moonlight, Steam Remote Play)
-  - Optimierte Gaming-Performance (CPU Pinning, Huge Pages)
-  - Template-basierte Deployment
-  - *KI-gestützte Konfiguration bereits entwickelt - wird bald integriert*
+### VM Provisioning
+- `win11_gaming_provisioner` - Automated Windows 11 Gaming VM creation
+  - NVIDIA GPU passthrough (vGPU or PCIe)
+  - Game streaming setup (Parsec, Moonlight, Steam Remote Play)
+  - Optimized gaming performance (CPU pinning, huge pages)
+  - Template-based deployment
+  - *AI-assisted configuration already developed - integration coming soon*
 
-## 🏗️ Architektur
+## 🏗️ Architecture
 
-Modulares System mit shared Libraries:
-- **Services**: Unabhängige Hintergrunddienste (Python, asyncio)
-- **Shared Client**: Einheitlicher Proxmox API-Zugriff mit Tag-Support
-- **Systemd Integration**: Native Linux-Service-Management
-- **Future**: REST APIs und Web-Dashboard geplant
+Modular system with shared libraries:
+- **Services**: Independent background services (Python, asyncio)
+- **Shared Client**: Unified Proxmox API access with tag support
+- **Systemd Integration**: Native Linux service management
+- **Future**: REST APIs and web dashboard planned
 
-## Projektstruktur
+## Project Structure
 
 ```
 .
-├── services/                  # Hintergrunddienste (Python)
-│   ├── node_idle_shutdown/   # Automatischer Node-Shutdown bei Idle
-│   └── shutdown/             # Zeitbasierter VM-Shutdown
-├── api/                      # REST API Backends (Python/FastAPI)
-├── web/                      # Web Frontends (HTML/JS/React)
-├── scripts/                  # Utility-Scripts
-└── shared/                   # Gemeinsame Bibliotheken und Utilities
-    ├── proxmox/              # Proxmox API Client mit Tag-Support
-    └── config/               # Konfigurationsverwaltung
+├── services/                  # Background services (Python)
+│   ├── node_idle_shutdown/   # Automatic node shutdown when idle
+│   └── shutdown/             # Scheduled VM shutdown
+├── api/                      # REST API backends (Python/FastAPI)
+├── web/                      # Web frontends (HTML/JS/React)
+├── scripts/                  # Utility scripts
+└── shared/                   # Shared libraries and utilities
+    ├── proxmox/              # Proxmox API client with tag support
+    └── config/               # Configuration management
 ```
 
-## 🛠️ Technologie-Stack
+## 🛠️ Tech Stack
 
-- **Services**: Python 3.11+ mit asyncio
-- **Proxmox API**: proxmoxer Library
-- **Config**: YAML-Konfiguration
-- **Logging**: structlog (strukturiertes JSON-Logging)
-- **Deployment**: systemd Services
-- **Future**: FastAPI REST APIs, React Dashboard
+- **Services**: Python 3.11+ with asyncio
+- **Proxmox API**: proxmoxer library
+- **Config**: YAML configuration
+- **Logging**: structlog (structured JSON logging)
+- **Deployment**: systemd services
+- **Future**: FastAPI REST APIs, React dashboard
 
 ## Installation
 
-### Automatische Installation (empfohlen)
+### Automatic Installation (recommended)
 
 ```bash
-# Als root ausführen
+# Run as root
 sudo ./install.sh
 ```
 
-Das Script:
-- ✅ Prüft Debian-Version (13+)
-- ✅ Installiert fehlende Dependencies
-- ✅ Erstellt Service-User
-- ✅ Richtet Virtual Environment ein
-- ✅ Installiert systemd Services
-- ✅ Konfiguriert Berechtigungen
+The script:
+- ✅ Checks Debian version (13+)
+- ✅ Installs missing dependencies
+- ✅ Creates service user
+- ✅ Sets up virtual environment
+- ✅ Installs systemd services
+- ✅ Configures permissions
 
-**Unterstützt:** Debian 13 (Trixie) und neuere Versionen
+**Supported:** Debian 13 (Trixie) and newer versions
 
-### Nach Installation
+### Post-Installation
 
-1. **Proxmox API konfigurieren:**
+1. **Configure Proxmox API:**
    ```bash
    sudo nano /opt/proxmox-services/config/proxmox.yml
    ```
 
-2. **Services aktivieren:**
+2. **Enable services:**
    ```bash
    # Node Idle Shutdown
    sudo systemctl enable --now proxmox-node-idle-shutdown
@@ -99,54 +102,54 @@ Das Script:
    sudo systemctl enable --now proxmox-scheduled-shutdown
    ```
 
-3. **Logs überwachen:**
+3. **Monitor logs:**
    ```bash
    sudo journalctl -u proxmox-node-idle-shutdown -f
    ```
 
-### Deinstallation
+### Uninstallation
 ```bash
 sudo ./uninstall.sh
 ```
 
-## Entwicklung
+## Development
 
-### Lokales Setup (ohne Installation)
+### Local Setup (without installation)
 ```bash
-# Virtual Environment erstellen
+# Create virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# Dependencies installieren
+# Install dependencies
 pip install -r requirements.txt
 
-# Config kopieren
+# Copy config
 cp config/proxmox.example.yml config/proxmox.yml
-# Config bearbeiten mit echten Credentials
+# Edit config with real credentials
 
-# Services testen
+# Test services
 python -m services.node_idle_shutdown.main
 python -m services.shutdown.main
 ```
 
-## Konfiguration
+## Configuration
 
-### 1. Proxmox API Token erstellen (Proxmox VE 9.x)
+### 1. Create Proxmox API Token (Proxmox VE 9.x)
 
 **Via Web UI:**
 1. Datacenter → Permissions → API Tokens
-2. Add → Token erstellen:
-   - User: `root@pam` (oder eigener User)
-   - Token ID: `automation` (beliebiger Name)
-   - ✅ **Privilege Separation deaktivieren** (für volle User-Rechte)
-3. Token Secret kopieren (wird nur einmal angezeigt!)
+2. Add → Create token:
+   - User: `root@pam` (or custom user)
+   - Token ID: `automation` (any name)
+   - ✅ **Disable Privilege Separation** (for full user rights)
+3. Copy token secret (shown only once!)
 
-**Via CLI (auf Proxmox Node):**
+**Via CLI (on Proxmox node):**
 ```bash
-# Token erstellen (ohne Privilege Separation)
+# Create token (without privilege separation)
 pveum user token add root@pam automation --privsep 0
 
-# Ausgabe: Token Secret (sicher aufbewahren!)
+# Output: Token secret (keep secure!)
 # ┌──────────────┬──────────────────────────────────────┐
 # │ key          │ value                                │
 # ├──────────────┼──────────────────────────────────────┤
@@ -155,46 +158,46 @@ pveum user token add root@pam automation --privsep 0
 # │ value        │ xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx │
 # └──────────────┴──────────────────────────────────────┘
 
-# Token-Liste anzeigen
+# List tokens
 pveum user token list root@pam
 ```
 
 ### 2. Proxmox API Config
-Erstelle `config/proxmox.yml` mit den Token-Daten:
+Create `config/proxmox.yml` with token data:
 ```bash
 cp config/proxmox.example.yml config/proxmox.yml
 ```
 
-Fülle die Datei aus:
+Fill in the file:
 ```yaml
 proxmox:
-  host: "192.168.1.10"          # Proxmox Host IP/Hostname
+  host: "192.168.1.10"          # Proxmox host IP/hostname
   user: "root@pam"               # User@Realm
-  token_name: "automation"       # Token ID (ohne User-Prefix)
+  token_name: "automation"       # Token ID (without user prefix)
   token_value: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # Secret
-  verify_ssl: false              # true bei gültigem SSL-Zertifikat
+  verify_ssl: false              # true for valid SSL certificate
 ```
 
-**Format-Hinweis:** Der `token_name` ist nur die Token-ID **ohne** User-Prefix:
+**Format note:** The `token_name` is only the token ID **without** user prefix:
 - Full Token ID: `root@pam!automation`
-- In Config verwenden: `token_name: "automation"`
+- Use in config: `token_name: "automation"`
 
 ### 3. VM/Container Tags
-Das System nutzt Proxmox Tags für intelligente Filterung:
+The system uses Proxmox tags for intelligent filtering:
 
-**`safe-shutdown` Tag**: VMs/Container mit diesem Tag sind "unkritisch"
-- Node Idle Shutdown: Node wird heruntergefahren wenn **nur noch** VMs mit diesem Tag laufen
-- Logik: VMs **OHNE** Tag = kritisch, blockieren Node-Shutdown
+**`safe-shutdown` tag**: VMs/containers with this tag are "non-critical"
+- Node Idle Shutdown: Node shuts down when **only** VMs with this tag are running
+- Logic: VMs **WITHOUT** tag = critical, block node shutdown
 
-**Tags setzen:**
+**Set tags:**
 ```bash
-# Unkritische VMs taggen (dürfen automatisch gestoppt werden)
+# Tag non-critical VMs (can be automatically stopped)
 python scripts/tag_vms.py --tag safe-shutdown --vmids 200 201 202
 qm set 200 --tags safe-shutdown
 
-# Kritische VMs NICHT taggen (halten Node am Laufen)
-# Beispiel: Datenbank, Monitoring, Router-VMs
+# Do NOT tag critical VMs (keep node running)
+# Examples: Database, monitoring, router VMs
 
-# Alle VMs anzeigen
+# Show all VMs
 python scripts/tag_vms.py --list
 ```
