@@ -58,6 +58,16 @@ main() {
     rm -f /etc/systemd/system/prxmx-scheduled-shutdown.service
     systemctl daemon-reload
     
+    # Sichere Config vor Löschung
+    CONFIG_BACKUP="/root/prxmx-config-backup"
+    if [[ -f "$INSTALL_DIR/config/proxmox.yml" ]]; then
+        log_info "Sichere Proxmox-Config nach $CONFIG_BACKUP/"
+        mkdir -p "$CONFIG_BACKUP"
+        cp "$INSTALL_DIR/config/proxmox.yml" "$CONFIG_BACKUP/proxmox.yml"
+        chmod 600 "$CONFIG_BACKUP/proxmox.yml"
+        log_warning "Config gesichert in: $CONFIG_BACKUP/proxmox.yml"
+    fi
+    
     log_info "Entferne Installation..."
     rm -rf "$INSTALL_DIR"
     
@@ -66,6 +76,13 @@ main() {
     
     echo
     echo -e "${GREEN}Deinstallation abgeschlossen${NC}"
+    if [[ -f "$CONFIG_BACKUP/proxmox.yml" ]]; then
+        echo
+        echo -e "${YELLOW}💡 Proxmox-Config wurde gesichert:${NC}"
+        echo "   $CONFIG_BACKUP/proxmox.yml"
+        echo
+        echo "Bei Neuinstallation wird gefragt, ob diese Config wiederverwendet werden soll."
+    fi
     echo
 }
 

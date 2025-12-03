@@ -205,7 +205,25 @@ setup_config() {
     log_info "Konfiguriere Services..."
     
     # Proxmox Config
+    CONFIG_BACKUP="/root/prxmx-config-backup/proxmox.yml"
+    
     if [[ ! -f "$INSTALL_DIR/config/proxmox.yml" ]]; then
+        # Prüfe ob Backup existiert
+        if [[ -f "$CONFIG_BACKUP" ]]; then
+            echo
+            log_warning "Gesicherte Proxmox-Config gefunden: $CONFIG_BACKUP"
+            read -p "Möchtest du die gesicherte Config wiederverwenden? (J/n) " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+                cp "$CONFIG_BACKUP" "$INSTALL_DIR/config/proxmox.yml"
+                chown "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR/config/proxmox.yml"
+                chmod 600 "$INSTALL_DIR/config/proxmox.yml"
+                log_success "Gesicherte Config wiederhergestellt"
+                return
+            fi
+        fi
+        
+        # Erstelle neue Config
         if [[ -f "$INSTALL_DIR/config/proxmox.example.yml" ]]; then
             cp "$INSTALL_DIR/config/proxmox.example.yml" "$INSTALL_DIR/config/proxmox.yml"
             chown "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR/config/proxmox.yml"
