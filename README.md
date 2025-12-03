@@ -1,11 +1,35 @@
-# Proxmox Management Services
+# prxmx - Proxmox Service Collection
 
-Ein modulares System für Proxmox VE Cluster-Management, bestehend aus:
-- **Services**: Hintergrunddienste für Monitoring, Wartung und Automatisierung
-  - `node_idle_shutdown`: Fährt Nodes automatisch herunter wenn nur noch unkritische VMs laufen
-  - `shutdown`: Zeitbasierter VM-Shutdown für Wartungsfenster
-- **REST APIs**: Backend-Services für externe Integrationen
-- **Web Frontend**: Dashboard für Cluster-Übersicht und -Verwaltung
+Eine wachsende Sammlung von Automatisierungs-Services für Proxmox VE Cluster.
+
+## 🎯 Verfügbare Services
+
+### `node_idle_shutdown` - Intelligenter Node-Shutdown ⚡
+Fährt Proxmox Nodes automatisch herunter wenn nur noch unkritische VMs laufen.
+- **Use Case:** Energie sparen bei hybrider Workload
+- **Logik:** VMs ohne `safe-shutdown` Tag halten Node am Laufen
+- **Status:** ✅ Production-ready
+
+### `shutdown` - Zeitbasierter VM-Shutdown 🕒
+Planmäßiger Shutdown von VMs zu definierten Zeiten.
+- **Use Case:** Nächtliche Shutdowns, Wartungsfenster
+- **Features:** Kaskadierter Shutdown, Tag-Filterung
+- **Status:** ✅ Production-ready
+
+## 🔮 Geplante Services
+
+- `backup_scheduler` - Intelligente Backup-Orchestrierung
+- `health_monitor` - Cluster-Health und Alerting
+- `resource_optimizer` - Automatische VM-Migration bei Last
+- `snapshot_manager` - Snapshot-Lifecycle-Management
+
+## 🏗️ Architektur
+
+Modulares System mit shared Libraries:
+- **Services**: Unabhängige Hintergrunddienste (Python, asyncio)
+- **Shared Client**: Einheitlicher Proxmox API-Zugriff mit Tag-Support
+- **Systemd Integration**: Native Linux-Service-Management
+- **Future**: REST APIs und Web-Dashboard geplant
 
 ## Projektstruktur
 
@@ -22,12 +46,14 @@ Ein modulares System für Proxmox VE Cluster-Management, bestehend aus:
     └── config/               # Konfigurationsverwaltung
 ```
 
-## Technologie-Stack
+## 🛠️ Technologie-Stack
 
-- **Services**: Python 3.11+ mit proxmoxer für Proxmox API
-- **API**: FastAPI für REST Endpoints
-- **Web**: Moderne JavaScript/TypeScript (React/Vue)
-- **Config**: YAML/TOML für Konfigurationsdateien
+- **Services**: Python 3.11+ mit asyncio
+- **Proxmox API**: proxmoxer Library
+- **Config**: YAML-Konfiguration
+- **Logging**: structlog (strukturiertes JSON-Logging)
+- **Deployment**: systemd Services
+- **Future**: FastAPI REST APIs, React Dashboard
 
 ## Installation
 
