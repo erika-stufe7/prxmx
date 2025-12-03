@@ -148,12 +148,21 @@ python -m services.shutdown.main
 
 ### 1. Create Proxmox API Token (Proxmox VE 9.x)
 
+**Required Permissions:**
+The API token needs these permissions on the node:
+- `VM.Audit` - Read VM/container status
+- `VM.PowerMgmt` - Shutdown VMs
+- `Sys.Audit` - Read node status and uptime
+- `Sys.PowerMgmt` - Shutdown nodes
+
+**Option 1: Use root@pam with privilege separation disabled (easiest)**
+
 **Via Web UI:**
 1. Datacenter → Permissions → API Tokens
 2. Add → Create token:
-   - User: `root@pam` (or custom user)
+   - User: `root@pam`
    - Token ID: `automation` (any name)
-   - ✅ **Disable Privilege Separation** (for full user rights)
+   - ✅ **Disable Privilege Separation** (token inherits all root permissions)
 3. Copy token secret (shown only once!)
 
 **Via CLI (on Proxmox node):**
@@ -173,6 +182,28 @@ pveum user token add root@pam automation --privsep 0
 # List tokens
 pveum user token list root@pam
 ```
+
+**Option 2: Custom user with specific permissions (more secure)**
+
+```bash
+# Create user
+pveum user add automation@pve --comment "prxmx automation"
+
+# Create API token WITH privilege separation
+pveum user token add automation@pve prxmx-token --privsep 1
+
+# Grant permissions on root path (/)
+pveum acl modify / --tokens automation@pve!prxmx-token --roles PVEVMAdmin,PVEAuditor
+
+# Grant Sys.PowerMgmt for node shutdown
+pveum acl modify /nodes --tokens automation@pve!prxmx-token --roles Administrator
+```
+
+**Troubleshooting Permission Errors:**
+If you see `403 Forbidden: Permission check failed (/nodes/pve5, Sys.Audit)`:
+1. Check token has `Sys.Audit` permission: `pveum user token permissions automation@pve!prxmx-token`
+2. Verify privilege separation is disabled OR permissions are correctly set
+3. Test API access: `pvesh get /nodes/pve5/status --token 'PVEAPIToken=root@pam!automation=xxxxx'`
 
 ### 2. Proxmox API Config
 Create `config/proxmox.yml` with token data:
