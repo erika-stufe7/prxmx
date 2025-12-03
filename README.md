@@ -14,6 +14,7 @@ Automatically shuts down Proxmox nodes when only non-critical VMs are running.
 Time-based shutdown of VMs at defined times.
 - **Use Cases:**
   - **Solar Energy Optimization:** Shutdown nodes at night when solar surplus ends, save battery/grid costs
+  - **Crypto Mining:** Run mining operations during free solar hours, auto-shutdown when electricity costs exceed profits
   - **Peak Energy Savings:** Run workloads during cheap daytime solar hours, shutdown expensive night operations
   - **Maintenance Windows:** Scheduled shutdowns for updates and maintenance
 - **Features:** Cascading shutdown, tag-based filtering
