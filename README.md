@@ -34,7 +34,6 @@ Time-based shutdown of VMs at defined times.
   - Game streaming setup (Parsec, Moonlight, Steam Remote Play)
   - Optimized gaming performance (CPU pinning, huge pages)
   - Template-based deployment
-  - *AI-assisted configuration already developed - integration coming soon*
 
 ## 🏗️ Architecture
 
