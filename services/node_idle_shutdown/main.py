@@ -1,3 +1,4 @@
+
 """
 Node Idle Shutdown Service für Proxmox.
 
@@ -109,13 +110,30 @@ class NodeIdleShutdownService:
             if self.config.min_uptime < 60:
                 logger.warning("min_uptime sehr kurz, empfohlen: >= 300s", value=self.config.min_uptime)
             
-            # Test Proxmox-Verbindung
-            nodes = self.proxmox.get_nodes()
-            if not nodes:
-                logger.error("Keine Proxmox Nodes gefunden - Config-Fehler?")
+            # Test Proxmox-Verbindung und Berechtigungen
+            logger.info("Prüfe Proxmox API-Zugriff und Berechtigungen...")
+            perm_check = self.proxmox.check_permissions()
+            
+            if not perm_check['success']:
+                logger.error("❌ Proxmox Berechtigungsprüfung fehlgeschlagen")
+                for error in perm_check['errors']:
+                    logger.error(f"  • {error}")
+                logger.info("Lösung: Stelle sicher, dass der API-Token diese Berechtigungen hat:")
+                logger.info("  • VM.Audit (VMs/Container auflisten)")
+                logger.info("  • VM.PowerMgmt (VMs/Container herunterfahren)")
+                logger.info("  • Sys.Audit (Node-Status lesen)")
+                logger.info("  • Sys.PowerMgmt (Nodes herunterfahren)")
+                logger.info("Oder deaktiviere 'Privilege Separation' für root@pam Token")
                 return False
             
-            logger.info("Konfiguration validiert", nodes_found=len(nodes))
+            # Log warnings
+            for warning in perm_check['warnings']:
+                logger.warning(warning)
+            
+            nodes_found = len(perm_check['nodes_accessible'])
+            logger.info("✅ Proxmox API-Zugriff validiert", 
+                       nodes_found=nodes_found,
+                       nodes=perm_check['nodes_accessible'])
             return True
         
         except Exception as e:

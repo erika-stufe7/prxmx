@@ -81,6 +81,36 @@ class ShutdownService:
         self.proxmox = ProxmoxClient.get_instance()
         self.running = False
     
+    def _validate_permissions(self) -> bool:
+        """Validate Proxmox API access and permissions."""
+        try:
+            logger.info("Prüfe Proxmox API-Zugriff und Berechtigungen...")
+            perm_check = self.proxmox.check_permissions()
+            
+            if not perm_check['success']:
+                logger.error("❌ Proxmox Berechtigungsprüfung fehlgeschlagen")
+                for error in perm_check['errors']:
+                    logger.error(f"  • {error}")
+                logger.info("Lösung: Stelle sicher, dass der API-Token diese Berechtigungen hat:")
+                logger.info("  • VM.Audit (VMs/Container auflisten)")
+                logger.info("  • VM.PowerMgmt (VMs/Container herunterfahren)")
+                logger.info("  • Sys.Audit (Node-Status lesen)")
+                logger.info("Oder deaktiviere 'Privilege Separation' für root@pam Token")
+                return False
+            
+            for warning in perm_check['warnings']:
+                logger.warning(warning)
+            
+            nodes_found = len(perm_check['nodes_accessible'])
+            logger.info("✅ Proxmox API-Zugriff validiert", 
+                       nodes_found=nodes_found,
+                       nodes=perm_check['nodes_accessible'])
+            return True
+        
+        except Exception as e:
+            logger.error("Berechtigungsprüfung fehlgeschlagen", error=str(e))
+            return False
+    
     async def check_and_shutdown(self):
         """Prüft Bedingungen und führt Shutdowns durch."""
         logger.info("Checking shutdown conditions")
@@ -224,6 +254,11 @@ class ShutdownService:
         """Hauptloop des Services."""
         self.running = True
         logger.info("Shutdown service started", check_interval=self.config.check_interval)
+        
+        # Validate permissions on startup
+        if not self._validate_permissions():
+            logger.error("Startup aborted due to permission errors")
+            return
         
         while self.running:
             try:

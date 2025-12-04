@@ -93,3 +93,71 @@ class ProxmoxClient:
         """Prüft ob VM/Container ein bestimmtes Tag hat."""
         tags = self.get_vm_tags(node, vmid, vm_type)
         return tag in tags
+    
+    def check_permissions(self) -> dict:
+        """
+        Checks Proxmox API access and required permissions.
+        
+        Returns:
+            dict with:
+                - success: bool
+                - errors: list of error messages
+                - warnings: list of warnings
+                - nodes_accessible: list of accessible node names
+        """
+        result = {
+            'success': True,
+            'errors': [],
+            'warnings': [],
+            'nodes_accessible': []
+        }
+        
+        try:
+            # Test 1: Can we connect and get cluster nodes?
+            nodes = self.client.nodes.get()
+            if not nodes:
+                result['errors'].append("No nodes found - check cluster access")
+                result['success'] = False
+                return result
+            
+            result['nodes_accessible'] = [n['node'] for n in nodes]
+            
+            # Test 2: Check permissions on each node
+            for node_info in nodes:
+                node = node_info['node']
+                
+                # Test Sys.Audit - node status
+                try:
+                    self.client.nodes(node).status.get()
+                except Exception as e:
+                    if '403' in str(e) or 'Permission' in str(e):
+                        result['errors'].append(f"Node {node}: Missing Sys.Audit permission - cannot read node status")
+                        result['success'] = False
+                    else:
+                        result['warnings'].append(f"Node {node}: Could not check status - {str(e)}")
+                
+                # Test VM.Audit - list VMs
+                try:
+                    self.client.nodes(node).qemu.get()
+                except Exception as e:
+                    if '403' in str(e) or 'Permission' in str(e):
+                        result['errors'].append(f"Node {node}: Missing VM.Audit permission - cannot list VMs")
+                        result['success'] = False
+                
+                # Test VM.Audit - list containers
+                try:
+                    self.client.nodes(node).lxc.get()
+                except Exception as e:
+                    if '403' in str(e) or 'Permission' in str(e):
+                        result['errors'].append(f"Node {node}: Missing VM.Audit permission - cannot list containers")
+                        result['success'] = False
+                
+                # Note: VM.PowerMgmt and Sys.PowerMgmt can't be tested without actually shutting down
+                # We just warn about them
+                result['warnings'].append(f"Node {node}: VM.PowerMgmt and Sys.PowerMgmt not tested (would require shutdown)")
+        
+        except Exception as e:
+            result['errors'].append(f"Connection failed: {str(e)}")
+            result['success'] = False
+        
+        return result
