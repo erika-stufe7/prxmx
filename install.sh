@@ -251,28 +251,33 @@ setup_config() {
 install_systemd_services() {
     log_info "Installiere systemd Services..."
     
-    # Node Idle Shutdown Service
+    # Node Idle Shutdown Service (runs as root for shutdown capability)
     cat > /etc/systemd/system/prxmx-node-idle-shutdown.service <<EOF
 [Unit]
-Description=Proxmox Node Idle Shutdown Service
-After=network.target
-Wants=network-online.target
+Description=prxmx Node Idle Shutdown Service
+After=network.target pve-cluster.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 Type=simple
-User=$SERVICE_USER
-Group=$SERVICE_USER
+User=root
+Group=root
 WorkingDirectory=$INSTALL_DIR
-ExecStart=$VENV_DIR/bin/python -m services.node_idle_shutdown.main
+Environment="PYTHONPATH=$INSTALL_DIR"
+ExecStart=$VENV_DIR/bin/python3 -m services.node_idle_shutdown.main
 
 # Restart strategy
 Restart=on-failure
 RestartSec=30
-StartLimitIntervalSec=300
-StartLimitBurst=5
 
-# Security
-NoNewPrivileges=true
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=prxmx-node-idle-shutdown
+
+# Security (allow shutdown capability)
+NoNewPrivileges=false
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
@@ -287,37 +292,37 @@ SyslogIdentifier=prxmx-node-idle-shutdown
 WantedBy=multi-user.target
 EOF
     
-    # Scheduled Shutdown Service
+    # Scheduled Shutdown Service (runs as root for VM shutdown capability)
     cat > /etc/systemd/system/prxmx-scheduled-shutdown.service <<EOF
 [Unit]
-Description=Proxmox Scheduled VM Shutdown Service
-After=network.target
-Wants=network-online.target
+Description=prxmx Scheduled VM Shutdown Service
+After=network.target pve-cluster.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 Type=simple
-User=$SERVICE_USER
-Group=$SERVICE_USER
+User=root
+Group=root
 WorkingDirectory=$INSTALL_DIR
-ExecStart=$VENV_DIR/bin/python -m services.shutdown.main
+Environment="PYTHONPATH=$INSTALL_DIR"
+ExecStart=$VENV_DIR/bin/python3 -m services.shutdown.main
 
 # Restart strategy
 Restart=on-failure
 RestartSec=30
-StartLimitIntervalSec=300
-StartLimitBurst=5
-
-# Security
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=$INSTALL_DIR
 
 # Logging
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=prxmx-scheduled-shutdown
+
+# Security
+NoNewPrivileges=false
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=$INSTALL_DIR
 
 [Install]
 WantedBy=multi-user.target
