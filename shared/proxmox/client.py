@@ -94,6 +94,41 @@ class ProxmoxClient:
         tags = self.get_vm_tags(node, vmid, vm_type)
         return tag in tags
     
+    def shutdown_node(self, node: str) -> bool:
+        """
+        Shutdown a Proxmox node.
+        
+        Args:
+            node: Node name to shutdown
+            
+        Returns:
+            True if shutdown initiated successfully
+            
+        Raises:
+            Exception: If shutdown command fails
+        """
+        import socket
+        import subprocess
+        
+        try:
+            hostname = socket.gethostname()
+            
+            if node == hostname:
+                # Local node - use system shutdown command (service runs as root)
+                cmd = ['shutdown', '-h', 'now']
+                subprocess.run(cmd, check=True)
+                return True
+            else:
+                # Remote node - use Proxmox API
+                # Correct endpoint: POST /nodes/{node}/status with command=shutdown
+                self.client.nodes(node).status.post(command='shutdown')
+                return True
+                
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Failed to execute shutdown command: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Failed to shutdown node {node}: {str(e)}")
+    
     def check_permissions(self) -> dict:
         """
         Checks Proxmox API access and required permissions.

@@ -261,7 +261,7 @@ class NodeIdleShutdownService:
                     logger.warning("🧪 DRY-RUN: Node-Shutdown würde jetzt ausgeführt", node=node)
                 else:
                     logger.warning("🔌 FAHRE NODE HERUNTER", node=node)
-                    self.proxmox.client.nodes(node).status.shutdown.post()
+                    self.proxmox.shutdown_node(node)
                     logger.info("Node-Shutdown-Befehl gesendet", node=node)
         
         except asyncio.TimeoutError:
